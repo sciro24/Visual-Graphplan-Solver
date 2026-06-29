@@ -1,5 +1,5 @@
 // ============================================================================
-// Mini-Graphplan — problem validation & normalization
+// Visual Graphplan Solver — problem validation & normalization
 //
 // Turns arbitrary user input (parsed JSON or form data) into a clean, safe
 // `Problem`, or a list of human-readable errors. Designed to be "smart":

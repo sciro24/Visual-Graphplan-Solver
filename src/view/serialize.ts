@@ -1,5 +1,5 @@
 // ============================================================================
-// Mini-Graphplan — visualization mapper (Module C)
+// Visual Graphplan Solver — visualization mapper (Module C)
 //
 // Transforms the engine's PlanningGraph into a flat, deterministic visual model
 // with explicit node positions (column = level, row = sorted index) and a clean

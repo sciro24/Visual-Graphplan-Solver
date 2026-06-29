@@ -1,5 +1,5 @@
 // ============================================================================
-// Mini-Graphplan — backward plan extraction
+// Visual Graphplan Solver — backward plan extraction
 //
 // Given an expanded planning graph whose goals are reachable at some level S_k,
 // search backward for a set of non-mutex actions in A_(k-1) that supports every

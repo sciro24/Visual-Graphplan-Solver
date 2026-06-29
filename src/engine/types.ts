@@ -1,5 +1,5 @@
 // ============================================================================
-// Mini-Graphplan — internal data model
+// Visual Graphplan Solver — internal data model
 //
 // A Graphplan planning graph is an alternating sequence of proposition levels
 // (state levels S0, S1, ...) and action levels (A0, A1, ...). This module

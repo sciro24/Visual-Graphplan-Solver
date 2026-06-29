@@ -1,4 +1,4 @@
-# Mini-Graphplan Visuale
+# Visual Graphplan Solver
 
 An interactive, didactic web app that builds, visualizes, and explains the
 **Graphplan** algorithm (Blum & Furst, 1997) step by step on small

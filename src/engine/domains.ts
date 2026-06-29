@@ -1,5 +1,5 @@
 // ============================================================================
-// Mini-Graphplan — demo problems
+// Visual Graphplan Solver — demo problems
 //
 // Small, hand-checked propositional domains. The engine is positive-STRIPS
 // (no negative preconditions); complementary states are modeled with explicit

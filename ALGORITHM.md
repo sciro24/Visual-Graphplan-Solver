@@ -1,4 +1,4 @@
-# Scelte algoritmiche — Mini-Graphplan
+# Scelte algoritmiche — Visual Graphplan Solver
 
 Documento breve sulle decisioni di progetto del motore Graphplan.
 

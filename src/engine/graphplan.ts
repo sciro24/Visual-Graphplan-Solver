@@ -1,5 +1,5 @@
 // ============================================================================
-// Mini-Graphplan — planning graph expansion + mutex computation
+// Visual Graphplan Solver — planning graph expansion + mutex computation
 //
 // Implements the EXPANSION half of Graphplan (Blum & Furst, 1997):
 //   - synthesize no-op / persistence actions

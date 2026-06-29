@@ -1,5 +1,5 @@
 // ============================================================================
-// Mini-Graphplan — solver outer loop (expand → extract → repeat)
+// Visual Graphplan Solver — solver outer loop (expand → extract → repeat)
 //
 // The pure expansion in graphplan.ts can stop at the first level where the
 // goals are non-mutex, but that level is not always sufficient for extraction

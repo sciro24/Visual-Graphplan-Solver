@@ -162,9 +162,9 @@ export function App() {
       {/* ---------------- LEFT ---------------- */}
       <aside className="panel left">
         <h1>
-          Mini-Graphplan
+          Visual Graphplan
           <span className="sub">
-            Visuale <span className="author">(by Diego Scirocco)</span>
+            Solver <span className="author">(by Diego Scirocco)</span>
           </span>
         </h1>
 

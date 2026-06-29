@@ -1,9 +1,9 @@
 {
-  "name": "mini-graphplan-visuale",
+  "name": "visual-graphplan-solver",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Mini-Graphplan Visuale — didactic Graphplan planner with interactive planning-graph visualization",
+  "description": "Interactive Graphplan solver and visualizer — expands the planning graph, computes mutexes, runs backward plan extraction with backtracking, and shows every step on custom or demo STRIPS domains.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
