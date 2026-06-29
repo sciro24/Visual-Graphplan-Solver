@@ -1,0 +1,16 @@
+{
+  "name": "Key, Door & Treasure",
+  "description": "Tre stanze in fila A-B-C. La chiave e' in A, la porta che separa B da C e' chiusa. Bisogna prendere la chiave, muoversi, aprire la porta e prendere il tesoro in C.",
+  "actions": [
+    { "name": "pickup-key", "preconditions": ["robot-A", "key-A"], "addEffects": ["has-key"], "delEffects": ["key-A"] },
+    { "name": "go-A-B", "preconditions": ["robot-A"], "addEffects": ["robot-B"], "delEffects": ["robot-A"] },
+    { "name": "go-B-A", "preconditions": ["robot-B"], "addEffects": ["robot-A"], "delEffects": ["robot-B"] },
+    { "name": "go-B-C", "preconditions": ["robot-B", "door-open"], "addEffects": ["robot-C"], "delEffects": ["robot-B"] },
+    { "name": "go-C-B", "preconditions": ["robot-C", "door-open"], "addEffects": ["robot-B"], "delEffects": ["robot-C"] },
+    { "name": "unlock-door", "preconditions": ["robot-B", "has-key", "door-closed"], "addEffects": ["door-open"], "delEffects": ["door-closed"] },
+    { "name": "grab-treasure", "preconditions": ["robot-C", "treasure-C"], "addEffects": ["has-treasure"], "delEffects": ["treasure-C"] }
+  ],
+  "init": ["robot-A", "key-A", "door-closed", "treasure-C"],
+  "goals": ["has-treasure"],
+  "complementary": [["robot-A", "robot-B"], ["robot-A", "robot-C"], ["robot-B", "robot-C"], ["door-open", "door-closed"]]
+}

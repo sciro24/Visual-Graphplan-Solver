@@ -1,0 +1,14 @@
+{
+  "name": "Pizza Delivery (2 furgoni)",
+  "description": "Due furgoni in deposito devono consegnare due pizze a due case diverse. Mostra parallelismo: caricare entrambe le pizze e guidare in parallelo su furgoni diversi.",
+  "actions": [
+    { "name": "load-p1-van1", "preconditions": ["van1-depot", "pizza1-depot"], "addEffects": ["pizza1-van1"], "delEffects": ["pizza1-depot"] },
+    { "name": "load-p2-van2", "preconditions": ["van2-depot", "pizza2-depot"], "addEffects": ["pizza2-van2"], "delEffects": ["pizza2-depot"] },
+    { "name": "drive-van1-depot-houseA", "preconditions": ["van1-depot"], "addEffects": ["van1-houseA"], "delEffects": ["van1-depot"] },
+    { "name": "drive-van2-depot-houseB", "preconditions": ["van2-depot"], "addEffects": ["van2-houseB"], "delEffects": ["van2-depot"] },
+    { "name": "unload-p1-houseA", "preconditions": ["van1-houseA", "pizza1-van1"], "addEffects": ["pizza1-delivered"], "delEffects": ["pizza1-van1"] },
+    { "name": "unload-p2-houseB", "preconditions": ["van2-houseB", "pizza2-van2"], "addEffects": ["pizza2-delivered"], "delEffects": ["pizza2-van2"] }
+  ],
+  "init": ["van1-depot", "van2-depot", "pizza1-depot", "pizza2-depot"],
+  "goals": ["pizza1-delivered", "pizza2-delivered"]
+}

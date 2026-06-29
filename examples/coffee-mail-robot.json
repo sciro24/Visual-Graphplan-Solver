@@ -1,0 +1,19 @@
+{
+  "name": "Coffee & Mail Robot",
+  "description": "Robot deve portare caffe e posta all'ufficio. Classico esempio AI: due sottobiettivi indipendenti ma risorse condivise (robot puo' portare solo un carico per volta).",
+  "actions": [
+    { "name": "get-coffee", "preconditions": ["at-kitchen", "hand-empty"], "addEffects": ["has-coffee"], "delEffects": ["hand-empty"] },
+    { "name": "get-mail", "preconditions": ["at-mailroom", "hand-empty"], "addEffects": ["has-mail"], "delEffects": ["hand-empty"] },
+    { "name": "deliver-coffee", "preconditions": ["at-office", "has-coffee"], "addEffects": ["coffee-delivered", "hand-empty"], "delEffects": ["has-coffee"] },
+    { "name": "deliver-mail", "preconditions": ["at-office", "has-mail"], "addEffects": ["mail-delivered", "hand-empty"], "delEffects": ["has-mail"] },
+    { "name": "go-kitchen-office", "preconditions": ["at-kitchen"], "addEffects": ["at-office"], "delEffects": ["at-kitchen"] },
+    { "name": "go-office-kitchen", "preconditions": ["at-office"], "addEffects": ["at-kitchen"], "delEffects": ["at-office"] },
+    { "name": "go-mailroom-office", "preconditions": ["at-mailroom"], "addEffects": ["at-office"], "delEffects": ["at-mailroom"] },
+    { "name": "go-office-mailroom", "preconditions": ["at-office"], "addEffects": ["at-mailroom"], "delEffects": ["at-office"] },
+    { "name": "go-kitchen-mailroom", "preconditions": ["at-kitchen"], "addEffects": ["at-mailroom"], "delEffects": ["at-kitchen"] },
+    { "name": "go-mailroom-kitchen", "preconditions": ["at-mailroom"], "addEffects": ["at-kitchen"], "delEffects": ["at-mailroom"] }
+  ],
+  "init": ["at-kitchen", "hand-empty"],
+  "goals": ["coffee-delivered", "mail-delivered"],
+  "complementary": [["at-kitchen", "at-office"], ["at-kitchen", "at-mailroom"], ["at-office", "at-mailroom"]]
+}
