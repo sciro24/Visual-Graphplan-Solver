@@ -1,11 +1,19 @@
 # Visual Graphplan Solver
 
-An interactive, didactic web app that builds, visualizes, and explains the
-**Graphplan** algorithm (Blum & Furst, 1997) step by step on small
-propositional planning domains. It shows the alternating layers of the planning
+An interactive, didactic web app that is, to every effect, a real **Graphplan**
+solver (Blum & Furst, 1997) — not just a static diagram generator. Given a
+propositional STRIPS domain, the engine actually expands the planning graph,
+computes every mutex, runs the goal test, and performs backward plan extraction
+with backtracking to either produce a valid, executable plan or correctly prove
+the problem unsolvable. The visual layer on top builds, renders, and explains
+that solving process step by step: the alternating layers of the planning
 graph, the persistence (no-op) actions, the mutex relations between actions and
 between literals, the goal test at each level, the level-off condition, and the
-backward extraction of a valid plan.
+backward extraction of the plan it found.
+
+The solving engine (`src/engine/`) has no dependency on the UI, runs headless,
+and is covered by 41 unit and end-to-end tests, so it can be used, read, or
+reused as a planner on its own, independently of the visualization.
 
 Author: Diego Scirocco.
 
@@ -21,14 +29,18 @@ Example of the form used to enter a custom problem:
 
 ## Goal of the Project
 
-The app is a single-page application meant for teaching and demonstration, not
-an industrial planner. The focus is the visual understanding of how Graphplan
-works internally: graph construction, insertion of persistence actions,
-computation of mutexes, goal testing, and backward plan extraction. The target
-user is a student or a teacher who wants to observe the inner behaviour of
-Graphplan on small but meaningful examples.
+The app is a single-page solver and teaching tool, not an industrial-scale
+planner — the scope is deliberately small propositional domains rather than
+large grounded PDDL problems. Within that scope it solves for real: it does
+not pre-script or fake the plans it shows, it derives them by actually running
+Graphplan's expansion and backward-extraction algorithm on whatever domain is
+loaded, built-in or user-supplied. The focus is making the solving process
+observable: graph construction, insertion of persistence actions, computation
+of mutexes, goal testing, and backward plan extraction, all visible at every
+step. The target user is a student or a teacher who wants to see both the
+answer and exactly how Graphplan got there.
 
-The engine is intentionally separated from the user interface, so the planning
+The engine is intentionally separated from the user interface, so the solving
 logic can be read, tested, and reused independently of the visualization.
 
 ## Quick Start
