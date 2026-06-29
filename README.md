@@ -11,12 +11,6 @@ graph, the persistence (no-op) actions, the mutex relations between actions and
 between literals, the goal test at each level, the level-off condition, and the
 backward extraction of the plan it found.
 
-The solving engine (`src/engine/`) has no dependency on the UI, runs headless,
-and is covered by 41 unit and end-to-end tests, so it can be used, read, or
-reused as a planner on its own, independently of the visualization.
-
-Author: Diego Scirocco.
-
 ## Screenshots
 
 Example of a planning graph as rendered by the app:
@@ -103,16 +97,16 @@ mutex (its formal reason).
 
 ## Demo Domains
 
-| Domain | Teaching purpose |
-|---|---|
-| Gripper (simplified) | Solvable in a few levels: pick at A, move A to B, drop at B. |
-| Blocksworld (2 blocks) | Solvable: pickup A, then stack A on B. |
-| Rocket (parallel actions) | Shows parallel actions in the same level: load both packages, fly, unload both. |
-| Spare Tire | Classic Russell and Norvig example: mounting the spare tire. |
+| Domain                     | Teaching purpose                                                                        |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| Gripper (simplified)       | Solvable in a few levels: pick at A, move A to B, drop at B.                            |
+| Blocksworld (2 blocks)     | Solvable: pickup A, then stack A on B.                                                  |
+| Rocket (parallel actions)  | Shows parallel actions in the same level: load both packages, fly, unload both.         |
+| Spare Tire                 | Classic Russell and Norvig example: mounting the spare tire.                            |
 | Sussman Anomaly (3 blocks) | Goal interaction: the subgoals cannot be achieved independently. Optimal six-step plan. |
-| Monkey and Bananas | Textbook AI planning problem: go, push, climb, grab. |
-| Have Cake and Eat It | Goals present but mutex at S1, extractable at S2. |
-| Vault | Unsolvable: the key is missing, the graph levels off immediately. |
+| Monkey and Bananas         | Textbook AI planning problem: go, push, climb, grab.                                    |
+| Have Cake and Eat It       | Goals present but mutex at S1, extractable at S2.                                       |
+| Vault                      | Unsolvable: the key is missing, the graph levels off immediately.                       |
 
 ## Custom Problems
 
@@ -144,8 +138,18 @@ Minimal importable JSON example:
 {
   "name": "Light Switch",
   "actions": [
-    { "name": "turn on",  "preconditions": ["off"], "addEffects": ["on"],  "delEffects": ["off"] },
-    { "name": "turn off", "preconditions": ["on"],  "addEffects": ["off"], "delEffects": ["on"] }
+    {
+      "name": "turn on",
+      "preconditions": ["off"],
+      "addEffects": ["on"],
+      "delEffects": ["off"]
+    },
+    {
+      "name": "turn off",
+      "preconditions": ["on"],
+      "addEffects": ["off"],
+      "delEffects": ["on"]
+    }
   ],
   "init": ["off"],
   "goals": ["on"]
@@ -192,35 +196,3 @@ src/
     ProblemBuilder.tsx   #   custom-problem editor (form and JSON)
     styles.css
 ```
-
-See ALGORITHM.md for the algorithmic design choices.
-
-## Algorithm Summary
-
-1. Expansion: from the initial state S0, build action level A0 with all
-   applicable actions plus a no-op per present literal, compute its mutexes,
-   then build state level S1 as the union of the add effects, and compute its
-   mutexes. Repeat.
-2. Goal test: at each state level, check that all goals are present and no goal
-   pair is mutex.
-3. Backward extraction: from the first satisfying level, choose a non-mutex set
-   of actions supporting all goals, regress to the union of their preconditions
-   as new subgoals, and recurse down to S0, backtracking on failure. The solver
-   keeps expanding and retrying until success or level-off.
-4. Level-off: if a new level adds no new propositions and does not change the
-   mutexes, the graph has stabilized; if the goals are still not reachable, the
-   problem is unsolvable.
-
-## Deep Links
-
-The URL accepts `?domain=<id>` to open a specific domain (including custom ones),
-`?extract=1` to show the extracted plan immediately, and `?builder=1` to open
-the custom-problem editor. Example: `/?domain=cake&extract=1`.
-
-## Testing
-
-The engine is covered by unit and end-to-end tests run with Vitest, including
-mutex computation, no-op generation, goal testing, level-off, backward
-extraction on every demo domain, validation of user input, and complex
-scenarios (tower building, multi-object gripper, parallel actions, and a
-non-trivial unsolvable case). Run them with `npm test`.

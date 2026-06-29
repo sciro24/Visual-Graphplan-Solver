@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "description": "Interactive Graphplan solver and visualizer — expands the planning graph, computes mutexes, runs backward plan extraction with backtracking, and shows every step on custom or demo STRIPS domains.",
   "scripts": {
     "dev": "vite",
