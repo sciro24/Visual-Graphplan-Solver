@@ -1,7 +1,5 @@
-// Modal to add a custom problem, either by uploading/pasting JSON or by
-// filling a smart form. Mutexes stay automatic (computed by the engine); the
-// user only optionally declares complementary literal pairs. Everything is
-// validated through engine/validate before it can be added.
+// Modal to add a custom problem via form, JSON, or PDDL. Input is validated
+// through engine/validate before it can be added.
 
 import { useMemo, useState } from "react";
 import { LIMITS, validateProblem } from "../engine/validate";

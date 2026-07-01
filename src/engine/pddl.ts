@@ -1,18 +1,10 @@
-// ============================================================================
-// Visual Graphplan Solver — PDDL front-end (parser + grounder)
+// PDDL front-end: parse a lifted domain+problem and ground it into the flat
+// shape validateProblem accepts. Actions are instantiated over the declared
+// objects, pruned by type.
 //
-// Parses a *lifted* PDDL domain + problem pair and grounds it into the flat,
-// propositional shape the rest of the engine consumes (the same object
-// `validateProblem` accepts). Grounding instantiates every action over the
-// declared objects, pruned by the type hierarchy so the planning graph stays
-// small and readable — which is exactly what makes typing worth supporting in
-// a didactic tool.
-//
-// Supported subset: :strips, :typing, :negative-preconditions (modeled as
-// delete effects), :equality (as a binding filter). Rejected with a clear
-// message: disjunctions, quantifiers (forall/exists), conditional effects
-// (when), numeric fluents, durative actions.
-// ============================================================================
+// Supported: :strips, :typing, :negative-preconditions (as delete effects),
+// :equality (binding filter). Rejected: disjunctions, quantifiers, conditional
+// effects (when), numeric fluents, durative actions.
 
 /** The raw problem shape consumed by `validateProblem`. */
 export interface RawProblemInput {

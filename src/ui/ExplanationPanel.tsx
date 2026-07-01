@@ -1,6 +1,4 @@
-// Module E — Explanation layer. Renders contextual, formal-but-readable
-// explanations that stay consistent with the current selection and algorithm
-// state.
+// Right panel: contextual explanations for the current selection and state.
 
 import type { ExtractionResult, PlanningGraph } from "../engine/types";
 import type { Selection } from "./GraphCanvas";

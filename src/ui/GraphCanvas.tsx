@@ -1,6 +1,5 @@
-// Center panel: deterministic level-based rendering of the planning graph.
-// Causal edges drawn as SVG bezier curves; mutex edges as dashed red arcs.
-// Nodes are absolutely positioned HTML for crisp text + easy interaction.
+// Level-based rendering of the planning graph: causal edges as SVG beziers,
+// mutex edges as dashed arcs, nodes as absolutely-positioned HTML.
 
 import { useMemo, type MouseEvent } from "react";
 import type {

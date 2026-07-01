@@ -1,11 +1,5 @@
-// ============================================================================
-// Visual Graphplan Solver — backward plan extraction
-//
-// Given an expanded planning graph whose goals are reachable at some level S_k,
-// search backward for a set of non-mutex actions in A_(k-1) that supports every
-// goal, recurse on the induced subgoals (the union of chosen preconditions)
-// down to S0. Uses depth-first backtracking over supporter choices.
-// ============================================================================
+// Backward plan extraction: pick non-mutex supporters for the goals at S_k,
+// recurse on their preconditions down to S0, with DFS backtracking.
 
 import { firstGoalLevel, goalsReachable, pairKey } from "./graphplan";
 import type {
@@ -19,11 +13,7 @@ interface SearchCtx {
   steps: ExtractionStep[];
 }
 
-/**
- * Attempt to extract a plan. If the first goal-satisfying level fails, the
- * caller is expected to have expanded further; here we try only at the given
- * (or first satisfying) level. Returns a structured, replayable result.
- */
+/** Extract a plan at the given (or first goal-satisfying) level. */
 export function extractPlan(
   graph: PlanningGraph,
   level?: number,
@@ -77,10 +67,7 @@ export function extractPlan(
   };
 }
 
-/**
- * Recursive backward search.
- * @returns true if goals at `level` can be regressed all the way to S0.
- */
+/** True if goals at `level` can be regressed all the way to S0. */
 function search(ctx: SearchCtx, goals: string[], level: number): boolean {
   if (level === 0) {
     // base case: all goals must already hold in S0

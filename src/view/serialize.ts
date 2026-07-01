@@ -1,14 +1,8 @@
-// ============================================================================
-// Visual Graphplan Solver — visualization mapper (Module C)
-//
-// Transforms the engine's PlanningGraph into a flat, deterministic visual model
-// with explicit node positions (column = level, row = sorted index) and a clean
-// separation between CAUSAL edges (precondition / add-effect / persistence) and
-// MUTEX edges. The layout is level-based, never force-directed, so the same
-// graph always renders the same way.
-// ============================================================================
+// Map the engine's PlanningGraph into a flat visual model: nodes positioned by
+// column (level) and row (sorted index), causal edges separated from mutex
+// edges. Layout is deterministic, never force-directed.
 
-import { goalsReachable, pairKey } from "../engine/graphplan";
+import { pairKey } from "../engine/graphplan";
 import type {
   ActionMutex,
   ExtractionResult,
@@ -242,6 +236,7 @@ export function serialize(
   return { nodes, edges, columns, width, height };
 }
 
+
 function colRowCount(c: ColumnMeta): number {
   return c.kind === "state" ? c.propCount ?? 0 : c.actionCount ?? 0;
 }
@@ -305,5 +300,3 @@ function sortActions(a: string, b: string): number {
   if (an !== bn) return an ? 1 : -1;
   return a < b ? -1 : a > b ? 1 : 0;
 }
-
-export { goalsReachable };

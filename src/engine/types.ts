@@ -1,20 +1,7 @@
-// ============================================================================
-// Visual Graphplan Solver — internal data model
-//
-// A Graphplan planning graph is an alternating sequence of proposition levels
-// (state levels S0, S1, ...) and action levels (A0, A1, ...). This module
-// defines the explicit, stable data structures the engine produces. Every
-// mutex carries an explicit, human-readable reason so the UI never has to
-// re-derive *why* a mutex exists at render time.
-// ============================================================================
+// Data model for the planning graph. Literals are atomic strings; mutexes
+// carry a precomputed explanation so the UI never re-derives them at render.
 
-/**
- * A ground literal. In this didactic engine literals are atomic strings
- * ("at-A", "free"); negation is represented by separate literals declared in
- * the domain (e.g. "ball-in-A" vs "ball-in-B"). The engine reasons about
- * mutual exclusion via delete effects rather than a negation operator, which
- * keeps the propositional model small and transparent.
- */
+/** A ground literal (atomic string id, e.g. "at-A"). */
 export interface Literal {
   /** Stable identifier, also used as display name. */
   id: string;
@@ -127,12 +114,7 @@ export interface Problem {
   actions: Action[];
   init: string[];
   goals: string[];
-  /**
-   * Optional user-declared complementary literal pairs (e.g. ["on", "off"]).
-   * They are treated as mutex-by-negation at every state level. Mutexes that
-   * arise from delete effects are still derived automatically; this only adds
-   * pairs the engine cannot infer structurally.
-   */
+  /** User-declared complementary pairs (e.g. ["on","off"]), mutex by negation. */
   complementary?: [string, string][];
   /** True for problems created by the user via the builder (not built-in). */
   custom?: boolean;

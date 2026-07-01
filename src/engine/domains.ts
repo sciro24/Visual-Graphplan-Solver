@@ -1,10 +1,5 @@
-// ============================================================================
-// Visual Graphplan Solver — demo problems
-//
-// Small, hand-checked propositional domains. The engine is positive-STRIPS
-// (no negative preconditions); complementary states are modeled with explicit
+// Built-in demo problems. Positive-STRIPS: complementary states use explicit
 // literals + delete effects (e.g. "have-cake" / "no-cake").
-// ============================================================================
 
 import type { Action, Problem } from "./types";
 
@@ -225,7 +220,3 @@ export const DOMAINS: Problem[] = [
   cake,
   vault,
 ];
-
-export function getProblem(id: string): Problem | undefined {
-  return DOMAINS.find((p) => p.id === id);
-}

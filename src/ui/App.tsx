@@ -1,7 +1,4 @@
-// Module D — Interaction/UI layer. Three-panel layout:
-//   left   = domain + problem + execution controls
-//   center = planning graph canvas
-//   right  = explanation / details / algorithm state
+// Three-panel app: left = controls, center = graph canvas, right = explanations.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DOMAINS } from "../engine/domains";
@@ -14,8 +11,7 @@ import { GraphCanvas, type Selection, type Toggles } from "./GraphCanvas";
 import { ExplanationPanel } from "./ExplanationPanel";
 import { ProblemBuilder } from "./ProblemBuilder";
 
-// Optional deep-link params (used for screenshots / sharing):
-//   ?domain=cake&extract=1
+// Deep-link params: ?domain=cake&extract=1&builder=1
 const params = new URLSearchParams(
   typeof window !== "undefined" ? window.location.search : "",
 );

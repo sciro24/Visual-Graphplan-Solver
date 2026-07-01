@@ -1,17 +1,5 @@
-// ============================================================================
-// Visual Graphplan Solver — planning graph expansion + mutex computation
-//
-// Implements the EXPANSION half of Graphplan (Blum & Furst, 1997):
-//   - synthesize no-op / persistence actions
-//   - build alternating proposition / action levels
-//   - compute action mutexes (inconsistent effects, interference,
-//     competing needs)
-//   - compute proposition mutexes (negation, inconsistent support)
-//   - detect level-off
-//
-// The extraction half lives in extract.ts. Keeping the two phases in separate
-// modules mirrors the conceptual split in the algorithm.
-// ============================================================================
+// Graphplan expansion: build alternating prop/action levels, compute mutexes,
+// detect level-off. Backward extraction lives in extract.ts.
 
 import type {
   Action,
@@ -42,10 +30,7 @@ export function makeNoOp(literal: string): Action {
   };
 }
 
-/**
- * Two actions have INCONSISTENT EFFECTS when one deletes a literal the other
- * adds.
- */
+/** Inconsistent effects: one action deletes what the other adds. */
 export function hasInconsistentEffects(a: Action, b: Action): string[] {
   const via: string[] = [];
   for (const e of a.addEffects) if (b.delEffects.includes(e)) via.push(e);
@@ -53,9 +38,7 @@ export function hasInconsistentEffects(a: Action, b: Action): string[] {
   return via;
 }
 
-/**
- * INTERFERENCE: one action deletes a precondition of the other.
- */
+/** Interference: one action deletes a precondition of the other. */
 export function hasInterference(a: Action, b: Action): string[] {
   const via: string[] = [];
   for (const p of b.preconditions) if (a.delEffects.includes(p)) via.push(p);
@@ -63,10 +46,7 @@ export function hasInterference(a: Action, b: Action): string[] {
   return via;
 }
 
-/**
- * COMPETING NEEDS: a precondition of a and a precondition of b are mutex at
- * the previous proposition level.
- */
+/** Competing needs: preconditions of a and b are mutex at the previous level. */
 export function hasCompetingNeeds(
   a: Action,
   b: Action,
@@ -134,15 +114,8 @@ export function computeActionMutexes(
 }
 
 /**
- * Compute proposition mutexes at a state level.
- *
- *  - NEGATION: two literals p, q are mutex if every action that supports p is
- *    mutex with every action that supports q (inconsistent support). Strict
- *    negation (p = ¬q) is modeled in this engine through delete effects, so it
- *    is captured by the inconsistent-support test below; we additionally flag
- *    pairs where literals are declared mutually exclusive (none here by
- *    default) — see `declaredNegations`.
- *  - INCONSISTENT SUPPORT: all pairs of supporting actions are mutex.
+ * Proposition mutexes: declared-complementary pairs (negation), plus
+ * inconsistent support (every supporter pair of p and q is mutex).
  */
 export function computePropMutexes(
   literals: string[],
@@ -201,10 +174,7 @@ export interface ExpandOptions {
   stopWhenGoalsReachable?: boolean;
 }
 
-/**
- * Expand the planning graph for a problem until either the goals are reachable
- * (non-mutex) or the graph levels off, whichever comes first.
- */
+/** Expand the graph until goals are reachable or it levels off. */
 export function expandGraph(
   problem: Problem,
   opts: ExpandOptions = {},
@@ -217,10 +187,7 @@ export function expandGraph(
   const actionsById: Record<string, Action> = {};
   for (const a of problem.actions) actionsById[a.id] = a;
 
-  // Declared complementary pairs: literals the user marks mutually exclusive
-  // (e.g. "light-on" / "light-off"). Structural negations from delete effects
-  // are still derived automatically via inconsistent support; this set only
-  // adds pairs the engine cannot infer on its own.
+  // User-declared complementary pairs (structural negations are derived anyway).
   const declaredNegations = new Set<string>(
     (problem.complementary ?? []).map(([a, b]) => pairKey(a, b)),
   );

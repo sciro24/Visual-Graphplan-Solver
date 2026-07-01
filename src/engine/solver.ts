@@ -1,17 +1,5 @@
-// ============================================================================
-// Visual Graphplan Solver — solver outer loop (expand → extract → repeat)
-//
-// The pure expansion in graphplan.ts can stop at the first level where the
-// goals are non-mutex, but that level is not always sufficient for extraction
-// (classic example: goals interact and need an extra "redo" level — Sussman
-// anomaly, Have-Cake). This module implements Graphplan's outer loop:
-//
-//   expand one more level → if goals reachable at the frontier, try to extract
-//   → on success stop; otherwise keep expanding until the graph levels off.
-//
-// Keeping it separate leaves expandGraph/extractPlan small and independently
-// testable.
-// ============================================================================
+// Graphplan outer loop: expand one level, try extraction at the frontier when
+// goals are reachable, repeat until solved or the graph levels off.
 
 import { expandGraph, firstGoalLevel, goalsReachable } from "./graphplan";
 import { extractPlan } from "./extract";

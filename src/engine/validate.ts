@@ -1,16 +1,6 @@
-// ============================================================================
-// Visual Graphplan Solver — problem validation & normalization
-//
-// Turns arbitrary user input (parsed JSON or form data) into a clean, safe
-// `Problem`, or a list of human-readable errors. Designed to be "smart":
-//   - literals can be omitted and are derived from everything referenced;
-//   - action ids are derived from names when missing;
-//   - structural mutexes stay automatic (engine), the user only optionally
-//     declares complementary pairs the engine cannot infer.
-//
-// Hard limits keep the planning graph small enough to expand/extract in the
-// browser without freezing.
-// ============================================================================
+// Normalize arbitrary user input (JSON or form) into a safe Problem, or a list
+// of human-readable errors. Literals/ids are derived when missing; limits keep
+// the graph small enough to expand in the browser.
 
 import type { Action, Literal, Problem } from "./types";
 
