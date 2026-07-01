@@ -112,6 +112,27 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
 
   const derivedLiterals = result?.problem?.literals.map((l) => l.id) ?? [];
 
+  // Popup listing which required form fields are still empty.
+  const [missingPopup, setMissingPopup] = useState<string[] | null>(null);
+
+  // Required-field check for the form mode (asterisk-marked fields).
+  function formMissing(): string[] {
+    if (mode !== "form") return [];
+    const miss: string[] = [];
+    if (!name.trim()) miss.push("Nome");
+    if (splitAtoms(init).length === 0) miss.push("Stato iniziale");
+    if (splitAtoms(goals).length === 0) miss.push("Goal");
+    if (actions.filter((a) => a.name.trim()).length === 0)
+      miss.push("Almeno un'azione");
+    return miss;
+  }
+
+  // Hide the two "missing required" engine errors in the form: they are already
+  // signalled by the red asterisks and the submit-time popup.
+  const shownErrors = (result?.errors ?? []).filter(
+    (e) => mode !== "form" || !e.startsWith("Serve almeno"),
+  );
+
   function updateAction(i: number, patch: Partial<FormAction>) {
     setActions((as) => as.map((a, j) => (j === i ? { ...a, ...patch } : a)));
   }
@@ -145,10 +166,18 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
   }
 
   function submit() {
+    const miss = formMissing();
+    if (miss.length) {
+      setMissingPopup(miss);
+      return;
+    }
     if (result?.ok && result.problem) {
       onAdd(result.problem);
       onClose();
+      return;
     }
+    // Still invalid for other reasons (dup id, bad atom names, …): surface them.
+    if (result && !result.ok) setMissingPopup(result.errors);
   }
 
   return (
@@ -280,7 +309,9 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
           ) : (
             <div className="form-pane">
               <div className="frow">
-                <label>Nome</label>
+                <label>
+                  Nome <span className="req">*</span>
+                </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -297,7 +328,9 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
               </div>
 
               <div className="frow">
-                <label>Stato iniziale</label>
+                <label>
+                  Stato iniziale <span className="req">*</span>
+                </label>
                 <input
                   value={init}
                   onChange={(e) => setInit(e.target.value)}
@@ -305,7 +338,9 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
                 />
               </div>
               <div className="frow">
-                <label>Goal</label>
+                <label>
+                  Goal <span className="req">*</span>
+                </label>
                 <input
                   value={goals}
                   onChange={(e) => setGoals(e.target.value)}
@@ -315,7 +350,9 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
 
               <div className="actions-block">
                 <div className="ab-head">
-                  <span>Azioni</span>
+                  <span>
+                    Azioni <span className="req">*</span>
+                  </span>
                   <button
                     className="ghost small"
                     onClick={() => setActions((a) => [...a, { ...EMPTY_ACTION }])}
@@ -396,11 +433,11 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
             {result && (
               <span
                 className={`mv-badge ${
-                  result.ok ? "good" : result.errors.length ? "bad" : "warn"
+                  result.ok ? "good" : shownErrors.length ? "bad" : "warn"
                 }`}
               >
-                {result.errors.length > 0
-                  ? `${result.errors.length} errori`
+                {shownErrors.length > 0
+                  ? `${shownErrors.length} errori`
                   : result.warnings.length > 0
                     ? `${result.warnings.length} avvisi`
                     : "ok"}
@@ -426,7 +463,7 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
               </div>
             </div>
           )}
-          {result?.errors.map((e, i) => (
+          {shownErrors.map((e, i) => (
             <p className="status bad" key={`e${i}`}>
               ⃠ {e}
             </p>
@@ -447,11 +484,41 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
           <button className="ghost" onClick={onClose}>
             Annulla
           </button>
-          <button className="primary" disabled={!result?.ok} onClick={submit}>
+          {/* In form mode the button stays enabled so the missing-fields popup
+              can fire; JSON/PDDL keep the strict disabled-until-valid behavior. */}
+          <button
+            className="primary"
+            disabled={mode === "form" ? false : !result?.ok}
+            onClick={submit}
+          >
             Aggiungi e visualizza
           </button>
         </footer>
       </div>
+
+      {missingPopup && (
+        <div
+          className="popup-backdrop"
+          onClick={() => setMissingPopup(null)}
+        >
+          <div className="popup" onClick={(e) => e.stopPropagation()}>
+            <h3>Campi obbligatori mancanti</h3>
+            <p className="hint">
+              Completa i seguenti campi prima di aggiungere il problema:
+            </p>
+            <ul className="popup-list">
+              {missingPopup.map((m, i) => (
+                <li key={i}>{m}</li>
+              ))}
+            </ul>
+            <div className="popup-foot">
+              <button className="primary" onClick={() => setMissingPopup(null)}>
+                Ho capito
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

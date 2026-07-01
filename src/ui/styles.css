@@ -66,7 +66,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-columns: 290px 1fr 320px;
+  grid-template-columns: 290px 1fr 290px;
   height: 100vh;
   overflow: hidden;
   transition: grid-template-columns 0.22s ease;
@@ -691,6 +691,99 @@ button.danger {
 }
 button.danger:hover {
   border-color: var(--bad);
+}
+
+/* ---------- required marker + popup ---------- */
+.req {
+  color: var(--mutex);
+  font-weight: 700;
+  margin-left: 2px;
+}
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+.popup {
+  width: min(400px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  padding: 20px 22px;
+}
+.popup h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.popup-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+.popup-list li {
+  color: var(--mutex);
+  font-weight: 600;
+  margin: 4px 0;
+}
+.popup-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+.popup-foot .primary {
+  width: auto;
+  padding: 8px 18px;
+}
+
+/* ---------- empty states ---------- */
+.empty-canvas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+.empty-card {
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-dim);
+}
+.empty-icon {
+  font-size: 46px;
+  line-height: 1;
+  color: var(--border);
+}
+.empty-card h2 {
+  margin: 0;
+  font-size: 19px;
+  color: var(--text);
+}
+.empty-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.empty-card .primary {
+  width: auto;
+  padding: 9px 18px;
+  margin-top: 4px;
+}
+.panel-empty {
+  padding: 24px 18px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 /* ---------- modal ---------- */

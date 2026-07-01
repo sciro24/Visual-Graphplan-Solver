@@ -50,7 +50,8 @@ export function App() {
       ...DOMAINS.map((d) => d.id),
       ...initialCustom.map((p) => p.id),
     ];
-    return want && known.includes(want) ? want : DOMAINS[0].id;
+    // No default domain: start on an empty canvas unless a valid ?domain= is given.
+    return want && known.includes(want) ? want : "";
   });
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [stepCol, setStepCol] = useState<number>(0); // revealed columns (inclusive)
@@ -65,7 +66,7 @@ export function App() {
   });
 
   const problem = useMemo(
-    () => lookup(domainId) ?? DOMAINS[0],
+    () => (domainId ? lookup(domainId) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [domainId, allProblems],
   );
@@ -85,12 +86,13 @@ export function App() {
   }
 
   function deleteCurrentCustom() {
-    if (!problem.custom) return;
+    if (!problem?.custom) return;
     setCustomProblems((cs) => cs.filter((c) => c.id !== problem.id));
-    setDomainId(DOMAINS[0].id);
+    setDomainId("");
   }
 
   function downloadProblem() {
+    if (!problem) return;
     const { id, name, description, literals, actions, init, goals, complementary } =
       problem;
     const payload = {
@@ -113,14 +115,17 @@ export function App() {
   }
 
   // Solve = expand-then-extract outer loop. Returns the graph expanded to the
-  // solution level (or fullest tried) plus the extraction result.
-  const solved = useMemo(() => solve(problem), [problem]);
-  const graph = solved.graph;
-  const goalLevel = solved.solvedLevel;
-  const extraction = solved.extraction.success ? solved.extraction : null;
+  // solution level (or fullest tried) plus the extraction result. Null when no
+  // domain is selected (empty canvas).
+  const solved = useMemo(() => (problem ? solve(problem) : null), [problem]);
+  const graph = solved?.graph ?? null;
+  const goalLevel = solved?.solvedLevel ?? -1;
+  const extraction =
+    solved && solved.extraction.success ? solved.extraction : null;
 
-  const totalCols =
-    graph.stateLevels.length + graph.actionLevels.length - 1;
+  const totalCols = graph
+    ? graph.stateLevels.length + graph.actionLevels.length - 1
+    : 0;
 
   // On the first render, reveal the whole graph but honor URL params
   // (?extract=1). On a real domain switch, reset stepping + hide the plan.
@@ -138,10 +143,12 @@ export function App() {
 
   const vg = useMemo(
     () =>
-      serialize(graph, {
-        uptoCol: stepCol,
-        extraction: extracted ? extraction : null,
-      }),
+      graph
+        ? serialize(graph, {
+            uptoCol: stepCol,
+            extraction: extracted ? extraction : null,
+          })
+        : null,
     [graph, stepCol, extracted, extraction],
   );
 
@@ -174,6 +181,7 @@ export function App() {
             value={domainId}
             onChange={(e) => setDomainId(e.target.value)}
           >
+            <option value="">— seleziona un dominio —</option>
             <optgroup label="Demo">
               {DOMAINS.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -191,20 +199,26 @@ export function App() {
               </optgroup>
             )}
           </select>
-          <p className="desc">{problem.description}</p>
+          <p className="desc">
+            {problem
+              ? problem.description
+              : "Nessun dominio selezionato. Scegli una demo o aggiungi un problema."}
+          </p>
           <div className="domain-actions">
             <button className="ghost small" onClick={() => setShowBuilder(true)}>
               ＋ Aggiungi problema
             </button>
-            <button
-              className="ghost small icon-btn"
-              onClick={downloadProblem}
-              title="Scarica il problema in JSON"
-              aria-label="Scarica JSON"
-            >
-              ⤓
-            </button>
-            {problem.custom && (
+            {problem && (
+              <button
+                className="ghost small icon-btn"
+                onClick={downloadProblem}
+                title="Scarica il problema in JSON"
+                aria-label="Scarica JSON"
+              >
+                ⤓
+              </button>
+            )}
+            {problem?.custom && (
               <button
                 className="ghost small icon-btn danger"
                 onClick={deleteCurrentCustom}
@@ -233,6 +247,8 @@ export function App() {
           </div>
         </section>
 
+        {problem && (
+        <>
         <section>
           <div className="kv">
             <span>Stato iniziale</span>
@@ -297,9 +313,11 @@ export function App() {
             goalLevel={goalLevel}
             reachableNow={goalReachableNow}
             extraction={extraction}
-            graph={graph}
+            graph={graph!}
           />
         </section>
+        </>
+        )}
 
         <section>
           <label className="field-label">Viste</label>
@@ -332,9 +350,11 @@ export function App() {
           >
             {theme === "dark" ? "☀ light" : "🌙 dark"}
           </button>
-          <button className="ghost" onClick={() => exportJson(graph)}>
-            ⤓ Grafo
-          </button>
+          {graph && (
+            <button className="ghost" onClick={() => exportJson(graph)}>
+              ⤓ Grafo
+            </button>
+          )}
         </section>
 
         <Legend />
@@ -342,12 +362,29 @@ export function App() {
 
       {/* ---------------- CENTER ---------------- */}
       <main className="panel center">
-        <GraphCanvas
-          vg={vg}
-          toggles={toggles}
-          selection={selection}
-          onSelect={handleSelect}
-        />
+        {vg ? (
+          <GraphCanvas
+            vg={vg}
+            toggles={toggles}
+            selection={selection}
+            onSelect={handleSelect}
+          />
+        ) : (
+          <div className="empty-canvas">
+            <div className="empty-card">
+              <div className="empty-icon">◇</div>
+              <h2>Nessun dominio da visualizzare</h2>
+              <p>
+                Seleziona un <strong>dominio demo</strong> dal menu a sinistra,
+                oppure <strong>aggiungi un problema</strong> (Form, JSON o PDDL)
+                per costruire ed esplorare il planning graph passo dopo passo.
+              </p>
+              <button className="primary" onClick={() => setShowBuilder(true)}>
+                ＋ Aggiungi un problema
+              </button>
+            </div>
+          </div>
+        )}
         {!rightOpen && (
           <button
             className="reveal-right"
@@ -371,13 +408,21 @@ export function App() {
             ›
           </button>
         </div>
-        <ExplanationPanel
-          graph={graph}
-          vg={vg}
-          selection={selection}
-          extraction={extracted ? extraction : null}
-          goalLevel={goalLevel}
-        />
+        {graph && vg ? (
+          <ExplanationPanel
+            graph={graph}
+            vg={vg}
+            selection={selection}
+            extraction={extracted ? extraction : null}
+            goalLevel={goalLevel}
+          />
+        ) : (
+          <div className="panel-empty">
+            <p>
+              Le spiegazioni compaiono qui una volta selezionato un dominio.
+            </p>
+          </div>
+        )}
       </aside>
 
       {showBuilder && (
