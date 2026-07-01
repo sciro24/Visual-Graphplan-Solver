@@ -466,7 +466,18 @@ input[type="range"] {
   opacity: 0.55;
   cursor: pointer;
 }
-.edge.mutex:hover,
+.edge.mutex {
+  pointer-events: none; /* clicks handled by the wide hit path below */
+}
+/* wide, invisible, easy-to-hover target sitting under the visible arc */
+.mutex-hit {
+  stroke: transparent;
+  stroke-width: 14;
+  fill: none;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.mutex-group:hover .edge.mutex,
 .edge.mutex.sel {
   opacity: 1;
   stroke-width: 2.2;
@@ -761,6 +772,32 @@ button.danger:hover {
 textarea {
   font-family: inherit;
 }
+.pddl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.pddl-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pddl-col-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.pddl-col .json-area {
+  min-height: 240px;
+}
+@media (max-width: 720px) {
+  .pddl-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .frow {
   display: flex;
   flex-direction: column;
@@ -857,12 +894,63 @@ textarea {
   font-family: var(--mono);
 }
 .modal-validation {
-  padding: 0 18px 6px;
-  max-height: 220px;
+  padding: 12px 18px;
+  max-height: 40vh;
   overflow: auto;
+  flex: 0 0 auto;
+  background: var(--panel-2);
+  border-top: 1px solid var(--border);
 }
 .modal-validation .status {
   margin: 6px 0 0;
+}
+.mv-head {
+  position: sticky;
+  top: -12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -12px -18px 8px;
+  padding: 10px 18px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+  z-index: 1;
+}
+.mv-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.mv-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.mv-badge.good {
+  color: var(--good, #3fb950);
+  border-color: currentColor;
+}
+.mv-badge.bad {
+  color: var(--mutex);
+  border-color: currentColor;
+}
+.mv-badge.warn {
+  color: #d29922;
+  border-color: currentColor;
+}
+.pane-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pane-head .hint {
+  flex: 1;
 }
 .derived {
   margin: 10px 0 6px;

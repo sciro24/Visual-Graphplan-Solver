@@ -2,7 +2,7 @@
 // Causal edges drawn as SVG bezier curves; mutex edges as dashed red arcs.
 // Nodes are absolutely positioned HTML for crisp text + easy interaction.
 
-import { useMemo } from "react";
+import { useMemo, type MouseEvent } from "react";
 import type {
   VisualEdge,
   VisualGraph,
@@ -207,17 +207,20 @@ function EdgePath({
     const midY = (y1 + y2) / 2;
     const bulge = Math.min(60, 18 + Math.abs(y2 - y1) * 0.25);
     const d = `M ${from.x + NODE_W} ${y1} C ${x + bulge} ${y1}, ${x + bulge} ${y2}, ${to.x + NODE_W} ${y2}`;
+    const pick = (ev: MouseEvent) => {
+      ev.stopPropagation();
+      onSelect({ type: "edge", id: edge.id });
+    };
     return (
-      <path
-        d={d}
-        className={`edge mutex ${selected ? "sel" : ""}`}
-        onClick={(ev) => {
-          ev.stopPropagation();
-          onSelect({ type: "edge", id: edge.id });
-        }}
-        style={{ pointerEvents: "stroke" }}
-        data-mid={midY}
-      />
+      <g className="mutex-group" data-mid={midY}>
+        {/* wide invisible hit area so the arc is easy to hover/click */}
+        <path d={d} className="edge mutex-hit" onClick={pick} />
+        <path
+          d={d}
+          className={`edge mutex ${selected ? "sel" : ""}`}
+          onClick={pick}
+        />
+      </g>
     );
   }
   // causal edge: from right edge of `from` to left edge of `to`

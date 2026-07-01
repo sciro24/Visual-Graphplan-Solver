@@ -5,6 +5,7 @@
 
 import { useMemo, useState } from "react";
 import { LIMITS, validateProblem } from "../engine/validate";
+import { pddlToRaw } from "../engine/pddl";
 import type { Problem } from "../engine/types";
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
   onClose: () => void;
 }
 
-type Mode = "form" | "json";
+type Mode = "form" | "json" | "pddl";
 
 interface FormAction {
   name: string;
@@ -46,7 +47,11 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
   // json state
   const [jsonText, setJsonText] = useState("");
 
-  // Build a raw problem (and any JSON parse error) from the active mode.
+  // pddl state
+  const [pddlDomain, setPddlDomain] = useState("");
+  const [pddlProblem, setPddlProblem] = useState("");
+
+  // Build a raw problem (and any parse error) from the active mode.
   const { raw, parseError } = useMemo<{
     raw: unknown;
     parseError: string | null;
@@ -58,6 +63,14 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
       } catch (e) {
         return { raw: null, parseError: (e as Error).message };
       }
+    }
+    if (mode === "pddl") {
+      if (!pddlDomain.trim() || !pddlProblem.trim())
+        return { raw: null, parseError: null };
+      const res = pddlToRaw(pddlDomain, pddlProblem);
+      return res.ok
+        ? { raw: res.raw, parseError: null }
+        : { raw: null, parseError: res.errors.join(" ") };
     }
     const built = {
       name,
@@ -79,7 +92,18 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
         .map((p) => [p[0], p[1]] as [string, string]),
     };
     return { raw: built, parseError: null };
-  }, [mode, jsonText, name, description, actions, init, goals, complementary]);
+  }, [
+    mode,
+    jsonText,
+    pddlDomain,
+    pddlProblem,
+    name,
+    description,
+    actions,
+    init,
+    goals,
+    complementary,
+  ]);
 
   const result = useMemo(
     () => (raw ? validateProblem(raw, existingIds) : null),
@@ -94,9 +118,28 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
 
   function loadFile(file: File) {
     const reader = new FileReader();
+    const isPddl = /\.pddl$/i.test(file.name);
     reader.onload = () => {
-      setMode("json");
-      setJsonText(String(reader.result));
+      const text = String(reader.result);
+      if (isPddl) {
+        setMode("pddl");
+        // route domain vs problem files by their (define (domain|problem ...))
+        if (/\(\s*define\s*\(\s*problem/i.test(text)) setPddlProblem(text);
+        else setPddlDomain(text);
+      } else {
+        setMode("json");
+        setJsonText(text);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function loadPddlInto(target: "domain" | "problem", file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result);
+      if (target === "domain") setPddlDomain(text);
+      else setPddlProblem(text);
     };
     reader.readAsText(file);
   }
@@ -131,27 +174,35 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
           >
             JSON
           </button>
-          <label className="tab file-tab">
-            ⤒ Carica file
-            <input
-              type="file"
-              accept="application/json,.json"
-              hidden
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) loadFile(f);
-              }}
-            />
-          </label>
+          <button
+            className={mode === "pddl" ? "tab active" : "tab"}
+            onClick={() => setMode("pddl")}
+          >
+            PDDL
+          </button>
         </div>
 
         <div className="modal-body">
           {mode === "json" ? (
             <div className="json-pane">
-              <p className="hint">
-                Incolla un problema in formato JSON (schema: name, actions[],
-                init[], goals[], opzionale literals[] e complementary[]).
-              </p>
+              <div className="pane-head">
+                <p className="hint">
+                  Incolla un problema in formato JSON (schema: name, actions[],
+                  init[], goals[], opzionale literals[] e complementary[]).
+                </p>
+                <label className="ghost small file-tab">
+                  ⤒ Carica file
+                  <input
+                    type="file"
+                    accept="application/json,.json"
+                    hidden
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) loadFile(f);
+                    }}
+                  />
+                </label>
+              </div>
               <textarea
                 className="json-area"
                 spellCheck={false}
@@ -161,6 +212,69 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
               />
               {parseError && (
                 <p className="status bad">JSON non valido: {parseError}</p>
+              )}
+            </div>
+          ) : mode === "pddl" ? (
+            <div className="pddl-pane">
+              <p className="hint">
+                Incolla o carica un dominio e un problema PDDL. Sottoinsieme
+                supportato: <code>:strips</code>, <code>:typing</code>,{" "}
+                <code>:negative-preconditions</code>, <code>:equality</code>. Le
+                azioni vengono istanziate (grounding) sugli oggetti dichiarati,
+                potate per tipo.
+              </p>
+              <div className="pddl-grid">
+                <div className="pddl-col">
+                  <div className="pddl-col-head">
+                    <span>Dominio</span>
+                    <label className="ghost small file-tab">
+                      ⤒ file
+                      <input
+                        type="file"
+                        accept=".pddl"
+                        hidden
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) loadPddlInto("domain", f);
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <textarea
+                    className="json-area"
+                    spellCheck={false}
+                    placeholder={PDDL_DOMAIN_PLACEHOLDER}
+                    value={pddlDomain}
+                    onChange={(e) => setPddlDomain(e.target.value)}
+                  />
+                </div>
+                <div className="pddl-col">
+                  <div className="pddl-col-head">
+                    <span>Problema</span>
+                    <label className="ghost small file-tab">
+                      ⤒ file
+                      <input
+                        type="file"
+                        accept=".pddl"
+                        hidden
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) loadPddlInto("problem", f);
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <textarea
+                    className="json-area"
+                    spellCheck={false}
+                    placeholder={PDDL_PROBLEM_PLACEHOLDER}
+                    value={pddlProblem}
+                    onChange={(e) => setPddlProblem(e.target.value)}
+                  />
+                </div>
+              </div>
+              {parseError && (
+                <p className="status bad">PDDL non valido: {parseError}</p>
               )}
             </div>
           ) : (
@@ -277,6 +391,29 @@ export function ProblemBuilder({ existingIds, onAdd, onClose }: Props) {
 
         {/* live validation */}
         <div className="modal-validation">
+          <div className="mv-head">
+            <span className="mv-title">Vincoli e validazione</span>
+            {result && (
+              <span
+                className={`mv-badge ${
+                  result.ok ? "good" : result.errors.length ? "bad" : "warn"
+                }`}
+              >
+                {result.errors.length > 0
+                  ? `${result.errors.length} errori`
+                  : result.warnings.length > 0
+                    ? `${result.warnings.length} avvisi`
+                    : "ok"}
+              </span>
+            )}
+          </div>
+          {!result && (
+            <p className="hint tiny">
+              Compila i campi: qui compaiono in tempo reale i vincoli non
+              rispettati (limiti su azioni/letterali/effetti, letterali non
+              dichiarati, goal irraggiungibili…).
+            </p>
+          )}
           {derivedLiterals.length > 0 && (
             <div className="derived">
               <span className="dl-title">
@@ -328,3 +465,27 @@ const JSON_PLACEHOLDER = `{
   "init": ["off"],
   "goals": ["on"]
 }`;
+
+const PDDL_DOMAIN_PLACEHOLDER = `(define (domain gripper)
+  (:requirements :strips :typing)
+  (:types room ball)
+  (:predicates (at-robot ?r - room) (at ?b - ball ?r - room)
+               (free) (carry ?b - ball))
+  (:action move
+    :parameters (?from - room ?to - room)
+    :precondition (and (at-robot ?from))
+    :effect (and (at-robot ?to) (not (at-robot ?from))))
+  (:action pick
+    :parameters (?b - ball ?r - room)
+    :precondition (and (at ?b ?r) (at-robot ?r) (free))
+    :effect (and (carry ?b) (not (at ?b ?r)) (not (free))))
+  (:action drop
+    :parameters (?b - ball ?r - room)
+    :precondition (and (carry ?b) (at-robot ?r))
+    :effect (and (at ?b ?r) (free) (not (carry ?b)))))`;
+
+const PDDL_PROBLEM_PLACEHOLDER = `(define (problem gripper-1)
+  (:domain gripper)
+  (:objects rooma roomb - room  ball1 - ball)
+  (:init (at-robot rooma) (at ball1 rooma) (free))
+  (:goal (and (at ball1 roomb))))`;
